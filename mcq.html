@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Branding Questionnaire</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+  <link rel="manifest" href="favicon/site.webmanifest">
+  <link rel="mask-icon" href="favicon/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="mcq_style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Branding Questionnaire</h1>
+    <div id="question-container">
+      <!-- Questions dynamically loaded here -->
+    </div>
+    <div id="controls">
+      <button id="prev-btn" disabled>Previous</button>
+      <button class="home " ><a href="./index.html">Home</a></button>
+      <button id="next-btn">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "What stage is your business currently in?", options: [{ text: "Just starting out", points: 4 }, { text: "Growing but lacking professionalism", points: 3 }, { text: "Established, looking for a refresh", points: 2 }], selected: null },
+      { text: "What is the purpose of your branding efforts?", options: [{ text: "To attract new customers", points: 3 }, { text: "To stand out in a competitive market", points: 3 }, { text: "To improve my brand's reputation and trust", points: 2 }, { text: "To launch a new product or service", points: 3 }], selected: null },
+      { text: "How important is consistency in your branding?", options: [{ text: "Very important", points: 4 }, { text: "Somewhat important", points: 3 }, { text: "Not a priority", points: 2 }], selected: null },
+      { text: "What best describes your target audience?", options: [{ text: "Young and trendy", points: 3 }, { text: "Professional and corporate", points: 4 }, { text: "Families or older demographics", points: 3 }], selected: null },
+      { text: "Do you currently have a logo or brand identity?", options: [{ text: "No, I need one from scratch", points: 4 }, { text: "Yes, but it needs a refresh", points: 3 }, { text: "Yes, and it’s already effective", points: 2 }], selected: null },
+      { text: "What is your budget for branding?", options: [{ text: "Low budget, DIY solutions", points: 2 }, { text: "Moderate budget, professional guidance", points: 3 }, { text: "High budget, comprehensive strategy", points: 4 }], selected: null },
+      { text: "How often do you engage with customers through branding?", options: [{ text: "Rarely", points: 2 }, { text: "Occasionally", points: 3 }, { text: "Frequently and strategically", points: 4 }], selected: null },
+      { text: "What platforms do you use for branding?", options: [{ text: "Social media only", points: 3 }, { text: "Social media and a website", points: 4 }, { text: "Traditional media (print, TV)", points: 3 }, { text: "All of the above", points: 4 }], selected: null },
+      { text: "How do you measure the success of your branding efforts?", options: [{ text: "Customer feedback", points: 3 }, { text: "Sales growth", points: 4 }, { text: "Increased recognition", points: 3 }, { text: "None of these", points: 2 }], selected: null },
+      { text: "What is the biggest challenge in your branding process?", options: [{ text: "Defining a clear message", points: 4 }, { text: "Staying consistent", points: 3 }, { text: "Engaging with the right audience", points: 3 }, { text: "Budget limitations", points: 2 }], selected: null },
+    ];
+
+    let currentQuestionIndex = 0;
+const questionContainer = document.getElementById("question-container");
+const nextBtn = document.getElementById("next-btn");
+const prevBtn = document.getElementById("prev-btn");
+
+function renderQuestion() {
+  const question = questions[currentQuestionIndex];
+  questionContainer.innerHTML = `
+    <div class="question">${question.text}</div>
+    <div class="options">
+      ${question.options
+        .map((option, index) => `
+          <label>
+            <input type="radio" name="option" value="${index}" 
+            ${question.selected === index ? "checked" : ""}>
+            ${option.text}
+          </label>
+        `)
+        .join("")}
+    </div>
+  `;
+}
+
+function saveSelectedOption() {
+  const selectedOption = document.querySelector('input[name="option"]:checked');
+  if (selectedOption) {
+    questions[currentQuestionIndex].selected = parseInt(selectedOption.value);
+  }
+}
+
+function validateCurrentQuestionAnswered() {
+  const selectedOption = document.querySelector('input[name="option"]:checked');
+  if (!selectedOption) {
+    alert("Please select an answer before proceeding to the next question.");
+    return false;
+  }
+  return true;
+}
+
+function generatePDF(totalScore, recommendation) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+
+  // Add a header with a background color
+  doc.setFillColor(41, 128, 185);
+  doc.rect(0, 0, pageWidth, 40, "F");
+
+  // Title
+  doc.setFontSize(24);
+  doc.setTextColor(255, 255, 255);
+  doc.text("THINK STUDIOS", 20, 15);
+  doc.text("Branding Assessment Report", 20, 25);
+
+  // Add the current date and time
+  const now = new Date();
+  const today = now.toLocaleDateString();
+  const time = now.toLocaleTimeString();
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Date: ${today}`, 20, 50);
+  doc.text(`Time: ${time}`, 20, 60);
+
+  // Branding score section
+  doc.setFontSize(16);
+  doc.setTextColor(41, 128, 185);
+  doc.text("Your Branding Score", 20, 80);
+
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`${totalScore}/40`, 20, 90);
+
+  // Recommendation section
+  doc.setFontSize(16);
+  doc.setTextColor(41, 128, 185);
+  doc.text("Recommended Solution", 20, 110);
+
+  const splitText = doc.splitTextToSize(recommendation, pageWidth - 40);
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(splitText, 20, 120);
+
+  // Response breakdown section
+  doc.setFontSize(16);
+  doc.setTextColor(41, 128, 185);
+  doc.text("Your Response Summary", 20, 160);
+
+  let yPosition = 170;
+  questions.forEach((question, index) => {
+    if (question.selected !== null) {
+      const response = `Q${index + 1}: ${question.options[question.selected].text}`;
+      const splitResponse = doc.splitTextToSize(response, pageWidth - 40);
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(splitResponse, 20, yPosition);
+      yPosition += 10 * splitResponse.length;
+    }
+  });
+
+  // Footer
+  doc.setFillColor(241, 241, 241);
+  doc.rect(0, doc.internal.pageSize.height - 30, pageWidth, 30, "F");
+  doc.setFontSize(10);
+  doc.setTextColor(128, 128, 128);
+  doc.text("Contact us to implement your branding strategy", 20, doc.internal.pageSize.height - 15);
+  doc.text("Email: thinkstudios4@gmail.com", 20, doc.internal.pageSize.height - 10);
+
+  // Save the PDF with a unique filename
+  doc.save(`Branding_Assessment_${today.replace(/\//g, "-")}_${time.replace(/:/g, "-")}.pdf`);
+}
+
+function showRecommendation() {
+  const totalScore = questions.reduce((sum, question) => {
+    return question.selected !== null
+      ? sum + question.options[question.selected].points
+      : sum;
+  }, 0);
+
+  let recommendation = "";
+  if (totalScore <= 20) {
+    recommendation = "Essential Branding: Ideal for startups or small businesses that need foundational branding (logo, colors, fonts). Focus on creating a strong visual identity. Offer: Basic Logo Design + Social Media Starter Kit.";
+  } else if (totalScore <= 30) {
+    recommendation = "Professional Branding: Mid-level branding for growing businesses. Includes visuals, messaging, and digital presence. Offer: Logo + Website Design + Social Media Templates.";
+  } else if (totalScore <= 40) {
+    recommendation = "Comprehensive Branding: Ideal for businesses aiming to stand out in competitive markets. Includes complete visual identity, brand guidelines, and targeted strategy. Offer: Logo, Website, Brand Strategy + Print Assets.";
+  } else {
+    recommendation = "Premium Branding & Rebranding: For high-ticket clients or established businesses needing a full refresh or luxurious branding experience. Offer: Brand Strategy, Logo, Website, Brand Guidelines, Social Media, Print, and Packaging Design.";
+  }
+
+  questionContainer.innerHTML = `
+    <h2>Thank you for completing the questionnaire!</h2>
+    <p>Your Total Score: <strong>${totalScore}</strong></p>
+    <p><strong>Recommendation:</strong> ${recommendation}</p>
+    <button id="download-btn">Download Assessment Report</button>
+  `;
+
+  nextBtn.style.display = "none";
+  prevBtn.style.display = "none";
+
+  document.getElementById("download-btn").addEventListener("click", () => {
+    generatePDF(totalScore, recommendation);
+  });
+}
+
+nextBtn.addEventListener("click", () => {
+  if (!validateCurrentQuestionAnswered()) return;
+  saveSelectedOption();
+  if (currentQuestionIndex < questions.length - 1) {
+    currentQuestionIndex++;
+    renderQuestion();
+    prevBtn.disabled = false;
+    if (currentQuestionIndex === questions.length - 1) {
+      nextBtn.textContent = "Submit";
+    }
+  } else {
+    showRecommendation();
+  }
+});
+
+prevBtn.addEventListener("click", () => {
+  if (currentQuestionIndex > 0) {
+    saveSelectedOption();
+    currentQuestionIndex--;
+    renderQuestion();
+    nextBtn.textContent = "Next";
+    if (currentQuestionIndex === 0) {
+      prevBtn.disabled = true;
+    }
+  }
+});
+
+// Initialize the first question
+renderQuestion();
+prevBtn.disabled = true;
+
+// Initial render
+renderQuestion();
+
+  </script>
+</body>
+</html>

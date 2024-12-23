@@ -1,0 +1,3 @@
+AddType video/mp4 .mp4
+
+If you don’t have backend access or aren’t using a hosting service that supports .htaccess, ensure the video is served from a platform that correctly supports video formats for iOS
